@@ -1,0 +1,50 @@
+{
+    "creator": "Sh1d0re",
+    "information": {
+        "status-name": {
+            "status-type": "playing",
+            "status-name": "Hello World!"
+        }
+    },
+    "triggers": {
+        "message-triggers": {
+            "note": {
+                "trigger-operator": "is",
+                "trigger-message": "!note $NOTE$",
+                "actions": [["REPLY/AUTHOR", "$NOTE$"]]
+            },
+            "say": {
+                "trigger-operator": "is",
+                "trigger-message": "!say $MSG$",
+                "actions": [["REPLY/CHANNEL", "$MSG$"]]
+            },
+            "ping-pong": {
+                "trigger-operator": "is",
+                "trigger-message": "!ping",
+                "actions": [["REPLY/CHANNEL", "pong!"]]
+            },
+            "time": {
+                "trigger-operator": "is",
+                "trigger-message": "!time",
+                "actions": [["REPLY/CHANNEL", "Current time is: $DATETIME$"]]
+            },
+            "hello": {
+                "trigger-operator": "in",
+                "trigger-message": "hello",
+                "actions": [["REPLY/CHANNEL", "hi there!"]],
+                "show-in-help": "False"
+            }
+        },
+        "time-triggers": {
+            
+        }
+    },
+    "variables": {
+        "": ""
+    },
+    "server-side-settings": {
+        "message-monitoring": "True",
+        "initial-guild-output": "True",
+        "turn-on-logs": "True"
+    }
+}

@@ -33,6 +33,11 @@
                 "trigger-message": "hello",
                 "actions": [["REPLY/CHANNEL", "hi there!"]],
                 "show-in-help": "False"
+            },
+            "python implementation example": {
+                "trigger-operator": "starts",
+                "trigger-message": "!dice",
+                "actions": [["PYTHON", "await message.channel.send(f'')"]]
             }
         },
         "time-triggers": {
@@ -42,9 +47,12 @@
     "variables": {
         "": ""
     },
+    "blacklist": {
+        "automatically-add-blacklist-members": "True"
+    },
     "server-side-settings": {
-        "message-monitoring": "True",
-        "initial-guild-output": "True",
+        "console-log-output": "True",
+        "message-console-log-output": "True",
         "turn-on-logs": "True"
     }
 }

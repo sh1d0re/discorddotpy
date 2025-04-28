@@ -37,7 +37,7 @@
             "python implementation example": {
                 "trigger-operator": "starts",
                 "trigger-message": "!dice",
-                "actions": [["PYTHON", "await message.channel.send(f'')"]]
+                "actions": [["PYTHON", ""]]
             }
         },
         "time-triggers": {
@@ -53,6 +53,6 @@
     "server-side-settings": {
         "console-log-output": "True",
         "message-console-log-output": "True",
-        "turn-on-logs": "True"
+        "save-log-as-file": "True"
     }
 }

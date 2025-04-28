@@ -1,15 +1,16 @@
-import json
 import os
+os.system("clear")
+
+import json
 import re
 from datetime import datetime
 import random
 import time
-import ast
 import platform
+import base64
+from utils import removeAnsiEscapeCodes, applyTextPadding, log, raiseError
 
 random.seed(time.time() * random.randint(100,999))
-
-os.system("clear")
 
 try:
     import discord
@@ -17,69 +18,10 @@ except ModuleNotFoundError:
     if input("Discord.py not found. Install? [y/n]").lower() == "y":
         os.system("pip install discord")
 
-config = {"server-side-settings": {"console-log-output": "True", "message-console-log-output": "True", "turn-on-logs": "False"}}
-fullLogOutput = []
-
-def applyTextPadding(text:str, maxLength:int, paddingCharacter:str, alignment:str, alignCenterTo="right"):
-    paddingTextLength = int(maxLength - (len(text) % maxLength))
-    halfPaddingTextLength = int(maxLength - (len(text) % maxLength)) / 2
-    paddingText = "".join([paddingCharacter for _ in range(int(paddingTextLength))])
-    halfPaddingText = "".join([paddingCharacter for _ in range(int(halfPaddingTextLength))])
-
-    paddedText = ""
-    if alignment == "left":
-        paddedText = text + paddingText
-    elif alignment == "right":
-        paddedText = paddingText + text
-    elif alignment == "center":
-        paddedText = halfPaddingText + text + halfPaddingText
-        if (paddingTextLength % 2) == 1:
-            if alignCenterTo == "left":
-                paddedText = paddingCharacter + paddedText
-            elif alignCenterTo == "right":
-                paddedText = paddedText + paddingCharacter
-
-def log(logMessage:str, type = "log"):
-    currentTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    logTypes = {
-        "msg": "\x1b[33m MSG\x1b[0m      ",
-        "log": "\x1b[35m LOG\x1b[0m      ",
-        "info": "\x1b[94m INFO\x1b[0m     ",
-        "token": "\x1b[31m TOKEN\x1b[0m    \x1b[30;40;2;3;5;9m",
-        "python": "\x1b[34;1m PYTHON\x1b[0m   ",
-        "error": "\x1b[31;1m ERROR\x1b[0m   "
-    }
-    logTypesName = logTypes.keys()
-
-    if not(type in logTypesName):
-        type = "log"
-
-    if bool(config["server-side-settings"]["console-log-output"]):
-        for logType in logTypesName:
-            if type == logType:
-                print(f"\x1b[90m{currentTime}{logTypes[logType]}{logMessage}\x1b[0m")
-                break
-        else:
-            print(f"\x1b[90m{currentTime}{logTypes["msg"]}{logMessage}\x1b[0m")
-    if bool(config["server-side-settings"]["turn-on-logs"]):
-        fullLogOutput.append([currentTime, type, logMessage])
-
-def raiseError(errorMsg:str, level:int, terminateSession:bool):
-    warningInitials = ["\x1b[32;1m[1]", "\x1b[33;1m[2]", "\x1b[31;1m[3]"]
-    log(f"{warningInitials[level - 1]} \x1b[3m{errorMsg}\x1b[0m", "error")
-    if terminateSession:
-        log("Terminating session...", "error")
-        exit()
 
 bot = discord.Client(intents = discord.Intents.all())
 
-log("Loading config.json...")
-try:
-    config = json.load(open('config.json'))
-    log(f"Executing with the following configurations:\n\x1b[7m{config}\x1b[0m")
-except FileNotFoundError:
-    raiseError("config.json not found!", 3, True)
-    exit()
+config = json.load(open('config.json'))
 
 def replaceVariables(text:str, passedVariables:dict):
     re.findall(r"\((\d+), (\d+)\)", )
@@ -104,8 +46,9 @@ def checkInternetConnection():
 @bot.event
 async def on_ready():
     guild_count = len(bot.guilds)
-    for guild in bot.guilds:
-        log(f"- {guild.id} (name: {guild.name})")
+    botGuilds = bot.guilds
+    for guild in range(len(botGuilds)):
+        log(f"{botGuilds[guild].id} (Name: {botGuilds[guild].name})")
     log("Bot is in " + str(guild_count) + " servers.")
     statusName = config["information"]["status-name"]["status-name"]
     statusType = config["information"]["status-name"]["status-type"]
@@ -115,7 +58,7 @@ async def on_ready():
         statusActivity = discord.Streaming(name=statusName)
     elif statusType == "listening":
         statusActivity = discord.Music(
-            name=statusName,
+            name=statusName["name"],
             title=statusType["title"],
             artist=statusType["artist"],
             artists=statusType["artists"],
@@ -138,7 +81,7 @@ async def on_message(message):
                     await message.channel.send(replaceVariables(act[1]))
                 elif act[0] == "PYTHON":
                     try:
-                        exec(act[1])
+                        exec(base64.b64decode(act[1]))
                     except Exception as e:
                         log(str(e), "python")
 

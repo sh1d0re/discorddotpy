@@ -29,6 +29,11 @@ def applyTextPadding(text:str, maxLength:int, paddingCharacter:str, alignment:st
 
     return(paddedText)
 
+def findNameForOverlap(text):
+    if text in fullLogOutput.keys():
+        text = findNameForOverlap(text + "+")
+    return(text)
+
 fullLogOutput = {}
 def log(logMessage:str, type = "log"):
     currentTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -53,22 +58,24 @@ def log(logMessage:str, type = "log"):
         else:
             print(f"\x1b[90m{currentTime} {logTypes["msg"]}{logMessage}\x1b[0m")
     if bool(config["server-side-settings"]["save-log-as-file"]):
-        fullLogOutput["currentTime"] = [type, removeAnsiEscapeCodes(logMessage)]
+        fullLogOutput[findNameForOverlap(currentTime)] = [type, removeAnsiEscapeCodes(logMessage)]
+
+def saveFullLogOutput():
+    backgroundData = json.load(open("data/.backgroundData.json"))
+    with open(f"logs/{int(backgroundData["total-executions"])}.json", "w") as logFile:
+        json.dump(fullLogOutput, logFile)
+    backgroundData["total-executions"] += 1
+    with open(f"data/.backgroundData.json", "w") as backgroundDataFile:
+        json.dump(backgroundData, backgroundDataFile)
 
 def raiseError(errorMsg:str, level:int, terminateSession:bool):
     warningInitials = ["\x1b[32;1m[1]", "\x1b[33;1m[2]", "\x1b[31;1m[3]"]
     log(f"{warningInitials[level - 1]} \x1b[3m{errorMsg}\x1b[0m", "error")
     if terminateSession:
         log("Terminating session...", "error")
-        print(fullLogOutput)
         if config["server-side-settings"]["save-log-as-file"]:
             saveFullLogOutput()
         exit()
-
-def saveFullLogOutput():
-    totalExecutions = json.load(open("data/.backgroundData.json"))["total-executions"]
-    with open(f"logs/{int(totalExecutions)}.json") as logFile:
-        json.dump(fullLogOutput, logFile)
 
 log("Loading config.json...")
 try:

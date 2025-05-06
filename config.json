@@ -1,58 +1,68 @@
 {
-    "creator": "Sh1d0re",
-    "information": {
-        "status-name": {
-            "status-type": "playing",
-            "status-name": "Hello World!"
-        }
-    },
-    "triggers": {
-        "message-triggers": {
-            "note": {
-                "trigger-operator": "is",
-                "trigger-message": "!note $NOTE$",
-                "actions": [["REPLY/AUTHOR", "$NOTE$"]]
-            },
-            "say": {
-                "trigger-operator": "is",
-                "trigger-message": "!say $MSG$",
-                "actions": [["REPLY/CHANNEL", "$MSG$"]]
-            },
-            "ping-pong": {
-                "trigger-operator": "is",
-                "trigger-message": "!ping",
-                "actions": [["REPLY/CHANNEL", "pong!"]]
-            },
-            "time": {
-                "trigger-operator": "is",
-                "trigger-message": "!time",
-                "actions": [["REPLY/CHANNEL", "Current time is: $DATETIME$"]]
-            },
-            "hello": {
-                "trigger-operator": "in",
-                "trigger-message": "hello",
-                "actions": [["REPLY/CHANNEL", "hi there!"]],
-                "show-in-help": "False"
-            },
-            "python implementation example": {
-                "trigger-operator": "starts",
-                "trigger-message": "!dice",
-                "actions": [["PYTHON", ""]]
-            }
-        },
-        "time-triggers": {
-            
-        }
-    },
-    "variables": {
-        "": ""
-    },
-    "blacklist": {
-        "automatically-add-blacklist-members": "True"
-    },
-    "server-side-settings": {
-        "console-log-output": "True",
-        "message-console-log-output": "True",
-        "save-log-as-file": "True"
+  "creator": "Sh1d0re",
+  "information": {
+    "status-name": {
+      "status-type": "playing",
+      "status-name": "Hello World!"
     }
+  },
+  "triggers": {
+    "message-triggers": {
+      "help": {
+        "trigger-operator": "is",
+        "trigger-message": "!help",
+        "actions": [["REPLY/CHANNEL", "$HELP$"]],
+        "description": ""
+      },
+      "ping-pong": {
+        "trigger-operator": "is",
+        "trigger-message": "!ping",
+        "actions": [["REPLY/CHANNEL", "pong! ($LATENCY$ms)"]],
+        "description": "Ping pong!"
+      },
+      "note": {
+        "trigger-operator": "is",
+        "trigger-message": "!note $NOTE$",
+        "actions": [["REPLY/AUTHOR", "```$NOTE$```"]],
+        "description": "Sends you back what you said to your DMs."
+      },
+      "say": {
+        "trigger-operator": "is",
+        "trigger-message": "!say $MSG$",
+        "actions": [["REPLY/CHANNEL", "$MSG$"]],
+        "description": "Make the bot say the same exact message given."
+      },
+      "time": {
+        "trigger-operator": "is",
+        "trigger-message": "!time",
+        "actions": [["REPLY/CHANNEL", "Current time is: $DATETIME$"]],
+        "description": "Returns the current datetime."
+      },
+      "hello": {
+        "trigger-operator": "in",
+        "trigger-message": "hello",
+        "actions": [["REPLY/CHANNEL", "hi!"]],
+        "description": "Greetings!",
+        "show-in-help": "False"
+      },
+      "random": {
+        "trigger-operator": "is",
+        "trigger-message": "!random $STARTVALUE$ $ENDVALUE$",
+        "actions": [["REPLY/CHANNEL", "$RANDOM($STARTVALUE$, $ENDVALUE$)$"]],
+        "description": "Rolls a random value."
+      }
+    },
+    "time-triggers": {}
+  },
+  "variables": {
+    "": ""
+  },
+  "blacklist": {
+    "automatically-add-blacklist-members": "True"
+  },
+  "server-side-settings": {
+    "console-log-output": "True",
+    "message-console-log-output": "True",
+    "save-log-as-file": "True"
+  }
 }

@@ -38,12 +38,13 @@ fullLogOutput = {}
 def log(logMessage:str, type = "log"):
     currentTime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     logTypes = {
-        "msg": "\x1b[33mMSG\x1b[0m",
-        "log": "\x1b[35mLOG\x1b[0m",
-        "info": "\x1b[94mINFO\x1b[0m",
-        "token": "\x1b[31mTOKEN\x1b[0m    \x1b[30;40;2;3;5;9m",
+        "log": "\x1b[35;1mLOG\x1b[0m",
+        "msg": "\x1b[33;1mMSG\x1b[0m",
+        "info": "\x1b[94;1mINFO\x1b[0m",
+        "token": "\x1b[31;1mTOKEN\x1b[0m    \x1b[30;40;2;3;5;9m",
         "python": "\x1b[34;1mPYTHON\x1b[0m",
-        "error": "\x1b[31;1mERROR\x1b[0m"
+        "error": "\x1b[31;1mERROR\x1b[0m",
+        "term": "\x1b[35;1mTERM\x1b[0m",
     }
     logTypesName = logTypes.keys()
 
@@ -65,7 +66,7 @@ def saveFullLogOutput():
     with open(f"logs/{int(backgroundData["total-executions"])}.json", "w") as logFile:
         json.dump(fullLogOutput, logFile)
     backgroundData["total-executions"] += 1
-    with open(f"data/.backgroundData.json", "w") as backgroundDataFile:
+    with open("data/.backgroundData.json", "w") as backgroundDataFile:
         json.dump(backgroundData, backgroundDataFile)
 
 def raiseError(errorMsg:str, level:int, terminateSession:bool):

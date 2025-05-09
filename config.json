@@ -41,7 +41,14 @@
       "hello": {
         "trigger-operator": "in",
         "trigger-message": "hello",
-        "actions": [["REPLY/CHANNEL", "hi!"]],
+        "actions": [["REPLY/CHANNEL", "hello!"]],
+        "description": "Greetings!",
+        "show-in-help": "False"
+      },
+      "hello-jp": {
+        "trigger-operator": "in",
+        "trigger-message": "こんにちは",
+        "actions": [["REPLY/CHANNEL", "こんばんは!"]],
         "description": "Greetings!",
         "show-in-help": "False"
       },

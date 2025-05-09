@@ -22,9 +22,10 @@ bot = discord.Client(intents = discord.Intents.all())
 
 config = json.load(open('config.json'))
 
-helpDiscordEmbed = discord.Embed(title="Bot Information",
+helpDiscordEmbed = discord.Embed(
+    title="Bot Information",
     description="",
-    color=0x00ff00
+    color=0x000000
 )
 for trigger in config["triggers"]["message-triggers"].keys():
     helpDiscordEmbed.add_field(
@@ -34,10 +35,14 @@ for trigger in config["triggers"]["message-triggers"].keys():
     )
 
 def replaceVariables(text:str, passedVariables={}):
+    variables = {}
     variables = {
         "DATETIME": str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
         "CREDITS": "Created by Sh1d0re. Coded in Python (discord.py). Licensed in GPL-3.0",
     } | passedVariables | config["variables"]
+    exactlyMatchingVariables = {
+        "$HELP$": helpDiscordEmbed
+    }
     randomFunctionPattern = r'RANDOM\((\d+), (\d+)\)'
     randomFunctionPattern = re.findall(randomFunctionPattern, text)
     if randomFunctionPattern:
@@ -47,8 +52,9 @@ def replaceVariables(text:str, passedVariables={}):
     for variable in variables.keys():
         text = text.replace(f"${variable}$", str(variables[variable]))
 
-    if text == "$HELP$":
-        text = helpDiscordEmbed
+    for exactlyMatchingVariable in exactlyMatchingVariables:
+        if text == exactlyMatchingVariable:
+            text = exactlyMatchingVariables[exactlyMatchingVariable]
 
     return(text)
 
@@ -95,40 +101,60 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     messageLatency = round(bot.latency * 1000)
-    log(f"({messageLatency}ms) {message.guild.name} / {message.channel.name} / {message.author}  [ {message.content} ]", "msg")
-    for messageTriggers in config["triggers"]["message-triggers"].keys():
-        trigger = config["triggers"]["message-triggers"][messageTriggers]
-        operators = [
-            trigger["trigger-operator"] == "is" and trigger["trigger-message"] == message.content,
-            trigger["trigger-operator"] == "in" and trigger["trigger-message"] in message.content
-        ]
-        if any(operators):
-            for act in trigger["actions"]:
-                replyWith = replaceVariables(act[1], {
-                    "LATENCY": messageLatency,
-                    "AUTHOR": message.author,
-                    "CHANNEL": message.channel.name,
-                    "CONTENT": message.content,
-                    "SERVER": message.guild.name
-                })
-                if act[0] == "REPLY/CHANNEL":
-                    if type(replyWith) == discord.Embed:
-                        await message.channel.send(embed=replyWith)
-                    elif type(replyWith) == str:
-                        await message.channel.send(replyWith)
-                elif act[0] == "REPLY/AUTHOR":
-                    if type(replyWith) == discord.Embed:
-                        await message.author.send(embed=replyWith)
-                    elif type(replyWith) == str:
-                        await message.author.send(replyWith)
+    try:
+        serverName = message.guild.name
+    except AttributeError:
+        serverName = message.author.name
 
-                elif act[0] == "PURGE":
-                    await message.channel.purge(limit=int(act[1])+1)
-                elif act[0] == "PYTHON":
-                    try:
-                        exec(base64.b64decode(act[1], "utf-8"))
-                    except Exception as e:
-                        log(str(e), "python")
+    try:
+        channelName = message.channel.name
+    except AttributeError:
+        channelName = message.channel
+
+    log(f"({messageLatency}ms) {serverName} / {channelName} / {message.author}  [ {message.content} ]", "msg")
+    blacklistData = json.load(open("data/blacklists.json"))
+    notBlacklisted = not(str(message.author.id) in list(blacklistData.keys()))
+    notMyself = not(message.author.id == bot.user.id)
+    if notBlacklisted and notMyself:
+        for messageTriggers in config["triggers"]["message-triggers"].keys():
+            trigger = config["triggers"]["message-triggers"][messageTriggers]
+            operators = [
+                trigger["trigger-operator"] == "is" and trigger["trigger-message"] == message.content,
+                trigger["trigger-operator"] == "in" and trigger["trigger-message"] in message.content
+            ]
+            if any(operators):
+                for act in trigger["actions"]:
+                    replyWith = replaceVariables(act[1], {
+                        "LATENCY": messageLatency,
+                        "AUTHOR": message.author,
+                        "CHANNEL": channelName,
+                        "SERVER": serverName,
+                        "CONTENT": message.content,
+                    })
+                    if act[0] == "REPLY/CHANNEL":
+                        if type(replyWith) == discord.Embed:
+                            await message.channel.send(embed=replyWith)
+                        elif type(replyWith) == str:
+                            await message.channel.send(replyWith)
+                    elif act[0] == "REPLY/AUTHOR":
+                        if type(replyWith) == discord.Embed:
+                            await message.author.send(embed=replyWith)
+                        elif type(replyWith) == str:
+                            await message.author.send(replyWith)
+                    elif act[0] == "PURGE":
+                        await message.channel.purge(limit=int(act[1])+1)
+                    elif act[0] == "PYTHON":
+                        try:
+                            exec(base64.b64decode(act[1], "utf-8"))
+                        except Exception as e:
+                            log(str(e), "python")
+    elif not(notBlacklisted):
+        blacklistedNotification = discord.Embed(
+            title="```You have been blacklisted```",
+            description=f"You cannot **{message.content}** since you've been blacklisted.\nReason: `{blacklistData[str(message.author.id)]["reason"]}`\nBlacklist Date: `{blacklistData[str(message.author.id)]["date"]}`",
+            color=0x000000
+        )  
+        await message.author.send(f"<@{message.author.id}>", embed=blacklistedNotification) 
 
 token = str(open("token.txt").read())
 log(token, "token")
